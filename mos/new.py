@@ -25,7 +25,7 @@ app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads/'
 UPLOAD_FOLDER = 'uploads'
 PHOTO_FOLDER = 'uploads'
-BASE_URL = "https://66e1-60-250-225-149.ngrok-free.app/"
+BASE_URL = "https://800b-220-128-241-245.ngrok-free.app/"
 line_bot_api = LineBotApi('6aM53Z8MDsBADtBFHV6ZtpWBGyB9WdZHDhYwQeyBpPOGcmM9kEhpFDOqcdPg0pr7sp6YSJSRtXQNAnNgfw66XB7R0xYapQfU6IynCAThkTa6oJuQjcdtp5zIYPtcWBPnmRwYDDvs21opy/7hUD93dwdB04t89/1O/w1cDnyilFU=')
 handler = WebhookHandler('a05ae0870e7a1e96463b33e5a8e203b5')
 
@@ -260,77 +260,90 @@ def echo(event):
     if user_line not in user_states:
         user_states[user_line] = {'waiting_for_device_id': False, 'waiting_for_device_choice': False, 'pending_action': None, 'waiting_for_interval': False}
 
-    # 狀態: 等待選擇裝置
+    # 獲取 device_name 的輔助函數
+    def get_device_name(device_id):
+        dname_sql = "SELECT `device_name` FROM `device` WHERE `device_id` = %s;"
+        devi_name = db.select(dname_sql, (device_id,))
+        return devi_name[0][0] if devi_name else "未知裝置"
+
+    # 狀態: 等待選擇裝置 (使用 device_name 顯示)
     if user_states[user_line].get('waiting_for_device_choice'):
-        device_id = user_input.strip()
-        sql_check_binding = "SELECT device_id FROM user WHERE user_line = %s AND device_id = %s;"
-        binding_data = db.select(sql_check_binding, (user_line, device_id))
+        selected_device_name = user_input.strip()
+        # 根據 device_name 查找對應的 device_id
+        sql_find_device = "SELECT device_id FROM device WHERE device_name = %s;"
+        device_data = db.select(sql_find_device, (selected_device_name,))
+        
+        if device_data:
+            device_id = device_data[0][0]
+            sql_check_binding = "SELECT device_id FROM user WHERE user_line = %s AND device_id = %s;"
+            binding_data = db.select(sql_check_binding, (user_line, device_id))
 
-        if binding_data:
-            user_states[user_line]['selected_device_id'] = device_id
-            user_states[user_line]['waiting_for_device_choice'] = False
-            pending_action = user_states[user_line]['pending_action']
+            if binding_data:
+                user_states[user_line]['selected_device_id'] = device_id
+                user_states[user_line]['waiting_for_device_choice'] = False
+                pending_action = user_states[user_line]['pending_action']
 
-            if pending_action == '裝置拍照':
-                sql_update_take_photo = "UPDATE `device` SET `take_photo` = '1' WHERE device_id = %s;"
-                try:
-                    db.update(sql_update_take_photo,(device_id,))
+                if pending_action == '裝置拍照':
+                    sql_update_take_photo = "UPDATE `device` SET `take_photo` = '1' WHERE device_id = %s;"
+                    try:
+                        db.update(sql_update_take_photo, (device_id,))
+                        line_bot_api.reply_message(
+                            event.reply_token,
+                            TextSendMessage(f'已選擇裝置{selected_device_name}，拍照功能已啟用。')
+                        )
+                    except Exception as e:
+                        line_bot_api.reply_message(
+                            event.reply_token,
+                            TextSendMessage(f'已選擇裝置{selected_device_name}，但設定拍照功能時發生錯誤: {e}')
+                        )
+
+                elif pending_action == '查詢裝置歷史紀錄':
+                    generate_last_7days_chart(device_id, db)
+                    now = datetime.now()
+                    today_date = now.strftime("%Y-%m-%d")
+                    image_url = f"{BASE_URL}/history/{selected_device_name}_{today_date}_7days_mosquito_history.png"
                     line_bot_api.reply_message(
                         event.reply_token,
-                        TextSendMessage(f'已選擇裝置 ID "{device_id}"，拍照功能已啟用。')
+                        ImageSendMessage(
+                            original_content_url=image_url,
+                            preview_image_url=image_url
+                        )
                     )
-                except Exception as e:
+
+                elif pending_action == '調整拍照間隔時間':
                     line_bot_api.reply_message(
                         event.reply_token,
-                        TextSendMessage(f'已選擇裝置 ID "{device_id}"，但設定拍照功能時發生錯誤: {e}')
+                        TextSendMessage(f'已選擇裝置 {selected_device_name}，請輸入想要設定的拍照間隔時間（秒）。')
                     )
+                    user_states[user_line]['waiting_for_interval'] = True
 
-            elif pending_action == '查詢裝置歷史紀錄':
-                dname_sql = "SELECT `device_name` FROM `device` WHERE `device_id` = %s;"
-                devi_name = db.select(dname_sql, (device_id,))
-                print(devi_name)
-                device_name = devi_name[0][0]
-                print(device_name)
-                generate_last_7days_chart(device_id,db)
-                now = datetime.now()
-                today_date = now.strftime("%Y-%m-%d")
-                image_url = f"{BASE_URL}/history/{device_name}_{today_date}_7days_mosquito_history.png"
-                line_bot_api.reply_message(
-                    event.reply_token,
-                    ImageSendMessage(
-                        original_content_url=image_url,
-                        preview_image_url=image_url
+                elif pending_action == '重置裝置':
+                    temp_sql = "UPDATE device SET temp = -1 WHERE device_id = %s;"
+                    db.update(temp_sql, (device_id,))
+                    reply_text = f'已選擇裝置{selected_device_name}，已重置。'
+                    line_bot_api.reply_message(
+                        event.reply_token,
+                        TextSendMessage(text=reply_text)
                     )
-                )
-
-            elif pending_action == '調整拍照間隔時間':
+            else:
                 line_bot_api.reply_message(
                     event.reply_token,
-                    TextSendMessage(f'已選擇裝置 ID "{device_id}"，請輸入想要設定的拍照間隔時間（秒）。')
-                )
-                user_states[user_line]['waiting_for_interval'] = True
-
-            elif pending_action == '重置裝置':
-                temp_sql = "UPDATE device SET temp = -1 WHERE device_id = %s;"
-                db.update(temp_sql, (device_id,))
-                reply_text = f'已選擇裝置 ID "{device_id}"，已重置。'
-                line_bot_api.reply_message(
-                    event.reply_token,
-                    TextSendMessage(text=reply_text)
+                    TextSendMessage('你輸入的裝置名稱未綁定，請從你的綁定清單中選擇一個有效的裝置名稱。')
                 )
         else:
             line_bot_api.reply_message(
                 event.reply_token,
-                TextSendMessage('你輸入的裝置 ID 未綁定，請從你的綁定清單中選擇一個有效的裝置 ID。')
+                TextSendMessage('輸入的裝置名稱不存在，請輸入正確的裝置名稱。')
             )
         return
 
     # 狀態: 等待拍照間隔時間輸入
     if user_states[user_line].get('waiting_for_interval'):
         device_id = user_states[user_line]['selected_device_id']
+        device_name = get_device_name(device_id)
         try:
             number = int(user_input.strip())
-            reply_text = f'裝置 ID "{device_id}" 的拍照時間已設為：{number}秒'
+            reply_text = f'裝置{device_name}的拍照時間已設為：{number}秒'
             sql_check_time = "SELECT take_time FROM device WHERE device_id = %s;"
             existing_time = db.select(sql_check_time, (device_id,))
 
@@ -358,14 +371,15 @@ def echo(event):
         user_states[user_line]['waiting_for_interval'] = False
         return
 
-    # 狀態: 等待裝置 ID 輸入（綁定流程）
+    # 狀態: 等待裝置 ID 輸入（綁定流程，保持使用 device_id）
     if user_states[user_line]['waiting_for_device_id']:
         device_id = user_input.strip()
         if re.fullmatch(r"[A-Za-z0-9]{2,100}", device_id):
-            sql_check_device = "SELECT * FROM device WHERE device_id = %s;"
+            sql_check_device = "SELECT device_name FROM device WHERE device_id = %s;"
             device_data = db.select(sql_check_device, (device_id,))
 
             if device_data:
+                device_name = device_data[0][0]
                 sql_check_binding = "SELECT * FROM user WHERE user_line = %s AND device_id = %s;"
                 binding_data = db.select(sql_check_binding, (user_line, device_id))
 
@@ -374,12 +388,12 @@ def echo(event):
                     db.insert(sql_insert_device, (user_line, device_id))
                     line_bot_api.reply_message(
                         event.reply_token,
-                        TextSendMessage(f'裝置 ID "{device_id}" 已成功綁定！\n如果還想新增其他裝置，請再次輸入 "新增裝置綁定"。')
+                        TextSendMessage(f'裝置 {device_name}（ID: {device_id}）已成功綁定！\n如果還想新增其他裝置，請再次輸入 "新增裝置綁定"。')
                     )
                 else:
                     line_bot_api.reply_message(
                         event.reply_token,
-                        TextSendMessage(f'裝置 ID "{device_id}" 已綁定過，請輸入其他未綁定的裝置 ID。')
+                        TextSendMessage(f'裝置 {device_name}（ID: {device_id}）已綁定過，請輸入其他未綁定的裝置 ID。')
                     )
                 user_states[user_line]['waiting_for_device_id'] = False
             else:
@@ -394,11 +408,12 @@ def echo(event):
             )
         return
 
-    # 檢查已綁定的裝置
+    # 檢查已綁定的裝置 (顯示 device_name)
     sql_check = "SELECT device_id FROM user WHERE user_line = %s;"
     user_info = db.select(sql_check, (user_line,))
+    bound_device_names = [get_device_name(row[0]) for row in user_info] if user_info else []
 
-    # 處理「新增裝置綁定」（無論是否已綁定）
+    # 處理「新增裝置綁定」
     if user_input.lower() == "新增裝置綁定":
         line_bot_api.reply_message(
             event.reply_token,
@@ -407,11 +422,11 @@ def echo(event):
         user_states[user_line]['waiting_for_device_id'] = True
         return
 
-    # 未綁定裝置的情況（適用所有指令）
+    # 未綁定裝置的情況
     if not user_info:
         line_bot_api.reply_message(
             event.reply_token,
-            TextSendMessage('你尚未綁定任何裝置 ID。\n請先輸入 "新增裝置綁定" 來綁定一台裝置。')
+            TextSendMessage('你尚未綁定任何裝置。\n請先輸入 "新增裝置綁定" 來綁定一台裝置。')
         )
         return
 
@@ -419,7 +434,7 @@ def echo(event):
     # 處理「查詢裝置網頁」（不需選擇裝置）
     if user_input == '查詢裝置網頁':
         reply_text = "歡迎使用網頁查詢服務！以下是我們的查詢網站："
-        reply_url = "http://120.126.17.57:5001"  # 可點擊的網址
+        reply_url = "http://120.126.17.57:5001"
         line_bot_api.reply_message(
             event.reply_token,
             [
@@ -432,52 +447,38 @@ def echo(event):
     # 需要選擇裝置的功能清單
     device_required_actions = ['裝置拍照', '查詢裝置歷史紀錄', '調整拍照間隔時間', '重置裝置']
 
-    # 綁定多台裝置的情況
+    # 綁定多台裝置的情況 (顯示 device_name)
     if len(user_info) > 1:
         if user_input in device_required_actions:
-            bound_devices = ", ".join([row[0] for row in user_info])
+            bound_devices = ", ".join(bound_device_names)
             user_states[user_line]['waiting_for_device_choice'] = True
             user_states[user_line]['pending_action'] = user_input
             line_bot_api.reply_message(
                 event.reply_token,
-                TextSendMessage(f'你已綁定多台裝置：{bound_devices}。\n請輸入你要操作的裝置 ID。')
+                TextSendMessage(f'你已綁定多台裝置：{bound_devices}。\n請輸入你要操作的裝置名稱。')
             )
             return
-        # 如果輸入不在 device_required_actions 中，繼續執行下面的默認回應
     else:
         device_id = user_info[0][0]  # 綁定一台裝置時直接使用
-        print(device_id)
-
-        # 處理綁定流程
-        if user_input.lower() == "新增裝置綁定":
-            line_bot_api.reply_message(
-                event.reply_token,
-                TextSendMessage('請問要綁定的裝置 ID 是什麼？')
-            )
-            user_states[user_line]['waiting_for_device_id'] = True
-            return
+        device_name = get_device_name(device_id)
 
         # 執行功能（已綁定一台裝置）
         if user_input == '裝置拍照':
             sql_update_take_photo = "UPDATE `device` SET `take_photo` = '1' WHERE device_id = %s;"
             try:
-                db.update(sql_update_take_photo)
+                db.update(sql_update_take_photo, (device_id,))
                 line_bot_api.reply_message(
                     event.reply_token,
-                    TextSendMessage('拍照功能已啟用。')
+                    TextSendMessage(f'裝置 {device_name} 拍照功能已啟用。')
                 )
             except Exception as e:
                 line_bot_api.reply_message(
                     event.reply_token,
-                    TextSendMessage(f'設定拍照功能時發生錯誤: {e}')
+                    TextSendMessage(f'裝置{device_name} 設定拍照功能時發生錯誤: {e}')
                 )
 
         elif user_input == '查詢裝置歷史紀錄':
-            dname_sql = "SELECT `device_name` FROM `device` WHERE `device_id` = %s;"
-            devi_name = db.select(dname_sql, (device_id,))
-            print(devi_name)
-            device_name = devi_name[0][0]
-            generate_last_7days_chart(device_id,db)
+            generate_last_7days_chart(device_id, db)
             now = datetime.now()
             today_date = now.strftime("%Y-%m-%d")
             image_url = f"{BASE_URL}/history/{device_name}_{today_date}_7days_mosquito_history.png"
@@ -492,7 +493,7 @@ def echo(event):
         elif user_input == '調整拍照間隔時間':
             line_bot_api.reply_message(
                 event.reply_token,
-                TextSendMessage(f'請輸入裝置 ID "{device_id}" 的拍照間隔時間（秒）。')
+                TextSendMessage(f'請輸入裝置 {device_name} 的拍照間隔時間（秒）。')
             )
             user_states[user_line]['waiting_for_interval'] = True
             user_states[user_line]['selected_device_id'] = device_id
@@ -500,18 +501,18 @@ def echo(event):
         elif user_input == '重置裝置':
             temp_sql = "UPDATE device SET temp = -1 WHERE device_id = %s;"
             db.update(temp_sql, (device_id,))
-            reply_text = "已重置"
+            reply_text = f'裝置 {device_name} 已重置。'
             line_bot_api.reply_message(
                 event.reply_token,
                 TextSendMessage(text=reply_text)
             )
 
-    # 未匹配任何功能時的回應
+    # 未匹配任何功能時的回應 (顯示 device_name)
     if not user_states[user_line].get('waiting_for_device_choice') and user_input.lower() != "新增裝置綁定":
-        bound_devices = ", ".join([row[0] for row in user_info])
+        bound_devices = ", ".join(bound_device_names)
         line_bot_api.reply_message(
             event.reply_token,
-            TextSendMessage(f'你的 LINE ID 已綁定以下裝置 ID：{bound_devices}。\n請輸入功能指令，例如 "裝置拍照" 或 "新增裝置綁定"。')
+            TextSendMessage(f'你的 LINE ID 已綁定以下裝置：{bound_devices}。\n請輸入功能指令，例如 "裝置拍照" 或 "新增裝置綁定"。')
         )
  
 if __name__ == "__main__":
