@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- 主機： 127.0.0.1
--- 產生時間： 2025-03-10 17:17:57
+-- 產生時間： 2025-03-24 03:47:05
 -- 伺服器版本： 10.4.32-MariaDB
--- PHP 版本： 8.2.12
+-- PHP 版本： 8.0.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -45,7 +45,7 @@ CREATE TABLE `device` (
 --
 
 INSERT INTO `device` (`device_id`, `device_name`, `device_network`, `device_address`, `device_temperature`, `device_humidity`, `take_time`, `temp`, `take_photo`, `photo_take`) VALUES
-('A1', 'Device1', '1', '24.991,121.1447', NULL, NULL, 250, 3, 0, 0),
+('A1', 'Device1', '0', '24.991,121.1447', NULL, NULL, 300, -1, 1, 0),
 ('A10', 'Device10', '1', '25.0017,121.2787', NULL, NULL, 500, 0, 0, 0),
 ('A11', 'Device11', '1', '24.9492,121.2497', NULL, NULL, 500, 0, 0, 0),
 ('A12', 'Device12', '1', '25.0624,121.1338', NULL, NULL, 500, 0, 0, 0),
@@ -56,7 +56,7 @@ INSERT INTO `device` (`device_id`, `device_name`, `device_network`, `device_addr
 ('A17', 'Device17', '1', '24.9877,121.1265', NULL, NULL, 500, 0, 0, 0),
 ('A18', 'Device18', '1', '25.0534,121.1417', NULL, NULL, 500, 0, 0, 0),
 ('A19', 'Device19', '1', '25.0313,121.1952', NULL, NULL, 500, 0, 0, 0),
-('A2', 'Device2', '1', '25.0129,121.2165', NULL, NULL, 333, 34, 0, 0),
+('A2', 'Device2', '1', '25.0129,121.2165', NULL, NULL, 333, 0, 1, 0),
 ('A20', 'Device20', '1', '24.9781,121.1458', NULL, NULL, 500, 0, 0, 0),
 ('A21', 'Device21', '1', '24.9541,121.2647', NULL, NULL, 500, 0, 0, 0),
 ('A22', 'Device22', '1', '24.9727,121.2267', NULL, NULL, 500, 0, 0, 0),
@@ -66,13 +66,13 @@ INSERT INTO `device` (`device_id`, `device_name`, `device_network`, `device_addr
 ('A26', 'Device26', '1', '25.0585,121.2002', NULL, NULL, 500, 0, 0, 0),
 ('A27', 'Device27', '1', '24.9829,121.1841', NULL, NULL, 500, 0, 0, 0),
 ('A28', 'Device28', '1', '25.0379,121.1304', NULL, NULL, 500, 0, 0, 0),
-('A29', 'Device29', '1', '25.0303,121.2092', NULL, NULL, 500, 0, 0, 0),
+('A29', 'Device29', '1', '25.0303,121.2092', NULL, NULL, 400, -1, 0, 0),
 ('A3', 'Device3', '1', '25.0197,121.1727', NULL, NULL, 333, 0, 0, 0),
 ('A30', 'Device30', '1', '24.9919,121.1232', NULL, NULL, 500, 0, 0, 0),
 ('A31', 'Device31', '1', '24.9963,121.1348', NULL, NULL, 500, 0, 0, 0),
 ('A4', 'Device4', '1', '25.0701,121.1881', NULL, NULL, 333, 0, 0, 0),
 ('A5', 'Device5', '1', '25.0695,121.2789', NULL, NULL, 333, 0, 0, 0),
-('A6', 'Device6', '1', '24.9481,121.1466', NULL, NULL, 333, 0, 0, 0),
+('A6', 'Device6', '1', '24.9481,121.1466', NULL, NULL, 30, 0, 0, 0),
 ('A7', 'Device7', '1', '25.0421,121.1218', NULL, NULL, 333, 0, 0, 0),
 ('A8', 'Device8', '1', '24.9534,121.274', NULL, NULL, 500, 0, 0, 0),
 ('A9', 'Device9', '1', '25.0328,121.1986', NULL, NULL, 500, 0, 0, 0);
@@ -121,9 +121,9 @@ CREATE TABLE `photo` (
 --
 
 INSERT INTO `photo` (`photo_id`, `photo_address`, `photo_location`, `photo_time`, `photo_storage`, `device_id`, `msg`, `count`) VALUES
-('0', '24.991,121.1447', 'Taoyuan', '20250108020233', 'uploads/Device1/20250108020233/detected_B6.jpg', 'A1', '0', 5),
-('1', '24.991,121.1447', 'Taoyuan', '20250108050233', 'uploads/Device1/20250108050233/detected_B7.jpg', 'A1', '0', 6),
-('10', '24.947,121.1492', 'Taoyuan', '20250105134529', 'uploads/Device2/20250105134529/detected_B8.jpg', 'A2', '0', 6),
+('0', '24.991,121.1447', 'Taoyuan', '20250108020233', 'uploads/Device1/20250108020233/detected_B6.jpg', 'A1', '1', 5),
+('1', '24.991,121.1447', 'Taoyuan', '20250108050233', 'uploads/Device1/20250108050233/detected_B7.jpg', 'A1', '1', 6),
+('10', '24.947,121.1492', 'Taoyuan', '20250105134529', 'uploads/Device2/20250105134529/detected_B8.jpg', 'A2', '1', 6),
 ('100', '24.9877,121.1265', 'Taoyuan', '20250110154000', 'uploads/Device17/20250110154000/detected_B8.jpg', 'A17', '0', 6),
 ('101', '25.0534,121.1417', 'Taoyuan', '20250105014529', 'uploads/Device18/20250105014529/detected_B3.jpg', 'A18', '0', 2),
 ('102', '25.0534,121.1417', 'Taoyuan', '20250105044529', 'uploads/Device18/20250105044529/detected_B4.jpg', 'A18', '0', 3),
@@ -134,7 +134,7 @@ INSERT INTO `photo` (`photo_id`, `photo_address`, `photo_location`, `photo_time`
 ('107', '25.0313,121.1952', 'Taoyuan', '20250105014529', 'uploads/Device19/20250105014529/detected_B1.jpg', 'A19', '0', 0),
 ('108', '25.0313,121.1952', 'Taoyuan', '20250105044529', 'uploads/Device19/20250105044529/detected_B2.jpg', 'A19', '0', 1),
 ('109', '25.0313,121.1952', 'Taoyuan', '20250105074529', 'uploads/Device19/20250105074529/detected_B3.jpg', 'A19', '0', 2),
-('11', '24.947,121.1492', 'Taoyuan', '20250105164529', 'uploads/Device2/20250105164529/detected_B9.jpg', 'A2', '0', 7),
+('11', '24.947,121.1492', 'Taoyuan', '20250105164529', 'uploads/Device2/20250105164529/detected_B9.jpg', 'A2', '1', 7),
 ('110', '25.0313,121.1952', 'Taoyuan', '20250105104529', 'uploads/Device19/20250105104529/detected_B4.jpg', 'A19', '0', 3),
 ('111', '25.0313,121.1952', 'Taoyuan', '20250105134529', 'uploads/Device19/20250105134529/detected_B5.jpg', 'A19', '0', 4),
 ('112', '25.0313,121.1952', 'Taoyuan', '20250105164529', 'uploads/Device19/20250105164529/detected_B6.jpg', 'A19', '0', 5),
@@ -197,21 +197,21 @@ INSERT INTO `photo` (`photo_id`, `photo_address`, `photo_location`, `photo_time`
 ('164', '25.0379,121.1304', 'Taoyuan', '20250105104529', 'uploads/Device28/20250105104529/detected_B11.jpg', 'A28', '0', 9),
 ('165', '25.0379,121.1304', 'Taoyuan', '20250105134529', 'uploads/Device28/20250105134529/detected_B12.jpg', 'A28', '0', 10),
 ('166', '25.0379,121.1304', 'Taoyuan', '20250105164529', 'uploads/Device28/20250105164529/detected_B13.jpg', 'A28', '0', 11),
-('167', '25.0303,121.2092', 'Taoyuan', '20250107052521', 'uploads/Device29/20250107052521/detected_B8.jpg', 'A29', '0', 6),
-('168', '25.0303,121.2092', 'Taoyuan', '20250107082521', 'uploads/Device29/20250107082521/detected_B9.jpg', 'A29', '0', 7),
-('169', '25.0303,121.2092', 'Taoyuan', '20250107112521', 'uploads/Device29/20250107112521/detected_B10.jpg', 'A29', '0', 8),
+('167', '25.0303,121.2092', 'Taoyuan', '20250107052521', 'uploads/Device29/20250107052521/detected_B8.jpg', 'A29', '1', 6),
+('168', '25.0303,121.2092', 'Taoyuan', '20250107082521', 'uploads/Device29/20250107082521/detected_B9.jpg', 'A29', '1', 7),
+('169', '25.0303,121.2092', 'Taoyuan', '20250107112521', 'uploads/Device29/20250107112521/detected_B10.jpg', 'A29', '1', 8),
 ('17', '25.0197,121.1727', 'Taoyuan', '20250110154000', 'uploads/Device3/20250110154000/detected_B8.jpg', 'A3', '0', 6),
-('170', '25.0303,121.2092', 'Taoyuan', '20250107142521', 'uploads/Device29/20250107142521/detected_B11.jpg', 'A29', '0', 9),
-('171', '25.0303,121.2092', 'Taoyuan', '20250107172521', 'uploads/Device29/20250107172521/detected_B12.jpg', 'A29', '0', 10),
-('172', '25.0303,121.2092', 'Taoyuan', '20250107202521', 'uploads/Device29/20250107202521/detected_B13.jpg', 'A29', '0', 11),
+('170', '25.0303,121.2092', 'Taoyuan', '20250107142521', 'uploads/Device29/20250107142521/detected_B11.jpg', 'A29', '1', 9),
+('171', '25.0303,121.2092', 'Taoyuan', '20250107172521', 'uploads/Device29/20250107172521/detected_B12.jpg', 'A29', '1', 10),
+('172', '25.0303,121.2092', 'Taoyuan', '20250107202521', 'uploads/Device29/20250107202521/detected_B13.jpg', 'A29', '1', 11),
 ('173', '24.9919,121.1232', 'Taoyuan', '20250110004000', 'uploads/Device30/20250110004000/detected_B1.jpg', 'A30', '1', 0),
 ('174', '24.9919,121.1232', 'Taoyuan', '20250110034000', 'uploads/Device30/20250110034000/detected_B2.jpg', 'A30', '1', 1),
 ('175', '24.9919,121.1232', 'Taoyuan', '20250110064000', 'uploads/Device30/20250110064000/detected_B3.jpg', 'A30', '1', 2),
 ('176', '24.9919,121.1232', 'Taoyuan', '20250110094000', 'uploads/Device30/20250110094000/detected_B4.jpg', 'A30', '1', 3),
 ('177', '24.9919,121.1232', 'Taoyuan', '20250110124000', 'uploads/Device30/20250110124000/detected_B5.jpg', 'A30', '1', 4),
 ('178', '24.9919,121.1232', 'Taoyuan', '20250110154000', 'uploads/Device30/20250110154000/detected_B6.jpg', 'A30', '1', 5),
-('179', '25.0129,121.2165', 'Taoyuan', '20250103174529', 'uploads/Device2/20250103174529/detected_A2.jpg', 'A2', '0', 3),
-('18', '25.0701,121.1881', 'Taoyuan', '20250107052521', 'uploads/Device4/20250107052521/detected_B7.jpg', 'A4', '0', 6),
+('179', '25.0129,121.2165', 'Taoyuan', '20250103174529', 'uploads/Device2/20250103174529/detected_A2.jpg', 'A2', '1', 3),
+('18', '25.0701,121.1881', 'Taoyuan', '20250107052521', 'uploads/Device4/20250107052521/detected_B7.jpg', 'A4', '1', 6),
 ('180', '25.0418,121.2612', 'Taoyuan', '20250222203949', 'uploads/Device31/20250222203949/detected_A4.jpg', 'A31', '1', 1),
 ('181', '25.0607,121.204', 'Taoyuan', '20250222204141', 'uploads/Device31/20250222204141/detected_A2.jpg', 'A31', '1', 3),
 ('182', '25.0074,121.2066', 'Taoyuan', '20250222204206', 'uploads/Device31/20250222204206/detected_A3.jpg', 'A31', '1', 5),
@@ -222,31 +222,31 @@ INSERT INTO `photo` (`photo_id`, `photo_address`, `photo_location`, `photo_time`
 ('187', '24.9714,121.1711', 'Taoyuan', '20250310231924', 'uploads/Device31/20250310231924/detected_A3.jpg', 'A31', '1', 5),
 ('188', '24.964,121.2448', 'Taoyuan', '20250310234002', 'uploads/Device31/20250310234002/detected_A5.jpg', 'A31', '1', 9),
 ('189', '25.025,121.2618', 'Taoyuan', '20250310234828', 'uploads/Device31/20250310234828/detected_A3.jpg', 'A31', '1', 5),
-('19', '25.0701,121.1881', 'Taoyuan', '20250107082521', 'uploads/Device4/20250107082521/detected_B8.jpg', 'A4', '0', 6),
+('19', '25.0701,121.1881', 'Taoyuan', '20250107082521', 'uploads/Device4/20250107082521/detected_B8.jpg', 'A4', '1', 6),
 ('190', '24.9963,121.1348', 'Taoyuan', '20250311001509', 'uploads/Device31/20250311001509/detected_A3.jpg', 'A31', '1', 5),
-('2', '24.991,121.1447', 'Taoyuan', '20250108080233', 'uploads/Device1/20250108080233/detected_B8.jpg', 'A1', '0', 6),
-('20', '25.0701,121.1881', 'Taoyuan', '20250107112521', 'uploads/Device4/20250107112521/detected_B9.jpg', 'A4', '0', 7),
-('21', '25.0701,121.1881', 'Taoyuan', '20250107142521', 'uploads/Device4/20250107142521/detected_B10.jpg', 'A4', '0', 8),
-('22', '25.0701,121.1881', 'Taoyuan', '20250107172521', 'uploads/Device4/20250107172521/detected_B11.jpg', 'A4', '0', 9),
-('23', '25.0701,121.1881', 'Taoyuan', '20250107202521', 'uploads/Device4/20250107202521/detected_B12.jpg', 'A4', '0', 10),
-('24', '25.0695,121.2789', 'Taoyuan', '20250108020233', 'uploads/Device5/20250108020233/detected_B2.jpg', 'A5', '0', 1),
-('25', '25.0695,121.2789', 'Taoyuan', '20250108050233', 'uploads/Device5/20250108050233/detected_B3.jpg', 'A5', '0', 2),
-('26', '25.0695,121.2789', 'Taoyuan', '20250108080233', 'uploads/Device5/20250108080233/detected_B4.jpg', 'A5', '0', 3),
-('27', '25.0695,121.2789', 'Taoyuan', '20250108110233', 'uploads/Device5/20250108110233/detected_B5.jpg', 'A5', '0', 4),
-('28', '25.0695,121.2789', 'Taoyuan', '20250108140233', 'uploads/Device5/20250108140233/detected_B6.jpg', 'A5', '0', 5),
-('29', '25.0695,121.2789', 'Taoyuan', '20250108170233', 'uploads/Device5/20250108170233/detected_B7.jpg', 'A5', '0', 6),
-('3', '24.991,121.1447', 'Taoyuan', '20250108110233', 'uploads/Device1/20250108110233/detected_B9.jpg', 'A1', '0', 7),
-('30', '24.9481,121.1466', 'Taoyuan', '20250107052521', 'uploads/Device6/20250107052521/detected_B4.jpg', 'A6', '0', 3),
-('31', '24.9481,121.1466', 'Taoyuan', '20250107082521', 'uploads/Device6/20250107082521/detected_B5.jpg', 'A6', '0', 4),
-('32', '24.9481,121.1466', 'Taoyuan', '20250107112521', 'uploads/Device6/20250107112521/detected_B6.jpg', 'A6', '0', 5),
-('33', '24.9481,121.1466', 'Taoyuan', '20250107142521', 'uploads/Device6/20250107142521/detected_B7.jpg', 'A6', '0', 6),
-('34', '24.9481,121.1466', 'Taoyuan', '20250107172521', 'uploads/Device6/20250107172521/detected_B8.jpg', 'A6', '0', 6),
-('35', '24.9481,121.1466', 'Taoyuan', '20250107202521', 'uploads/Device6/20250107202521/detected_B9.jpg', 'A6', '0', 7),
+('2', '24.991,121.1447', 'Taoyuan', '20250108080233', 'uploads/Device1/20250108080233/detected_B8.jpg', 'A1', '1', 6),
+('20', '25.0701,121.1881', 'Taoyuan', '20250107112521', 'uploads/Device4/20250107112521/detected_B9.jpg', 'A4', '1', 7),
+('21', '25.0701,121.1881', 'Taoyuan', '20250107142521', 'uploads/Device4/20250107142521/detected_B10.jpg', 'A4', '1', 8),
+('22', '25.0701,121.1881', 'Taoyuan', '20250107172521', 'uploads/Device4/20250107172521/detected_B11.jpg', 'A4', '1', 9),
+('23', '25.0701,121.1881', 'Taoyuan', '20250107202521', 'uploads/Device4/20250107202521/detected_B12.jpg', 'A4', '1', 10),
+('24', '25.0695,121.2789', 'Taoyuan', '20250108020233', 'uploads/Device5/20250108020233/detected_B2.jpg', 'A5', '1', 1),
+('25', '25.0695,121.2789', 'Taoyuan', '20250108050233', 'uploads/Device5/20250108050233/detected_B3.jpg', 'A5', '1', 2),
+('26', '25.0695,121.2789', 'Taoyuan', '20250108080233', 'uploads/Device5/20250108080233/detected_B4.jpg', 'A5', '1', 3),
+('27', '25.0695,121.2789', 'Taoyuan', '20250108110233', 'uploads/Device5/20250108110233/detected_B5.jpg', 'A5', '1', 4),
+('28', '25.0695,121.2789', 'Taoyuan', '20250108140233', 'uploads/Device5/20250108140233/detected_B6.jpg', 'A5', '1', 5),
+('29', '25.0695,121.2789', 'Taoyuan', '20250108170233', 'uploads/Device5/20250108170233/detected_B7.jpg', 'A5', '1', 6),
+('3', '24.991,121.1447', 'Taoyuan', '20250108110233', 'uploads/Device1/20250108110233/detected_B9.jpg', 'A1', '1', 7),
+('30', '24.9481,121.1466', 'Taoyuan', '20250107052521', 'uploads/Device6/20250107052521/detected_B4.jpg', 'A6', '1', 3),
+('31', '24.9481,121.1466', 'Taoyuan', '20250107082521', 'uploads/Device6/20250107082521/detected_B5.jpg', 'A6', '1', 4),
+('32', '24.9481,121.1466', 'Taoyuan', '20250107112521', 'uploads/Device6/20250107112521/detected_B6.jpg', 'A6', '1', 5),
+('33', '24.9481,121.1466', 'Taoyuan', '20250107142521', 'uploads/Device6/20250107142521/detected_B7.jpg', 'A6', '1', 6),
+('34', '24.9481,121.1466', 'Taoyuan', '20250107172521', 'uploads/Device6/20250107172521/detected_B8.jpg', 'A6', '1', 6),
+('35', '24.9481,121.1466', 'Taoyuan', '20250107202521', 'uploads/Device6/20250107202521/detected_B9.jpg', 'A6', '1', 7),
 ('36', '25.0421,121.1218', 'Taoyuan', '20241231035959', 'uploads/Device7/20241231035959/detected_B3.jpg', 'A7', '0', 2),
 ('37', '25.0421,121.1218', 'Taoyuan', '20241231065959', 'uploads/Device7/20241231065959/detected_B4.jpg', 'A7', '0', 3),
 ('38', '25.0421,121.1218', 'Taoyuan', '20241231095959', 'uploads/Device7/20241231095959/detected_B5.jpg', 'A7', '0', 4),
 ('39', '25.0421,121.1218', 'Taoyuan', '20241231125959', 'uploads/Device7/20241231125959/detected_B6.jpg', 'A7', '0', 5),
-('4', '24.991,121.1447', 'Taoyuan', '20250108140233', 'uploads/Device1/20250108140233/detected_B10.jpg', 'A1', '0', 8),
+('4', '24.991,121.1447', 'Taoyuan', '20250108140233', 'uploads/Device1/20250108140233/detected_B10.jpg', 'A1', '1', 8),
 ('40', '25.0421,121.1218', 'Taoyuan', '20241231155959', 'uploads/Device7/20241231155959/detected_B7.jpg', 'A7', '0', 6),
 ('41', '25.0421,121.1218', 'Taoyuan', '20241231185959', 'uploads/Device7/20241231185959/detected_B8.jpg', 'A7', '0', 6),
 ('42', '24.9534,121.274', 'Taoyuan', '20250107052521', 'uploads/Device8/20250107052521/detected_B4.jpg', 'A8', '0', 3),
@@ -257,7 +257,7 @@ INSERT INTO `photo` (`photo_id`, `photo_address`, `photo_location`, `photo_time`
 ('47', '24.9534,121.274', 'Taoyuan', '20250107202521', 'uploads/Device8/20250107202521/detected_B9.jpg', 'A8', '0', 7),
 ('48', '25.0328,121.1986', 'Taoyuan', '20250105014529', 'uploads/Device9/20250105014529/detected_B7.jpg', 'A9', '0', 6),
 ('49', '25.0328,121.1986', 'Taoyuan', '20250105044529', 'uploads/Device9/20250105044529/detected_B8.jpg', 'A9', '0', 6),
-('5', '24.991,121.1447', 'Taoyuan', '20250108170233', 'uploads/Device1/20250108170233/detected_B11.jpg', 'A1', '0', 9),
+('5', '24.991,121.1447', 'Taoyuan', '20250108170233', 'uploads/Device1/20250108170233/detected_B11.jpg', 'A1', '1', 9),
 ('50', '25.0328,121.1986', 'Taoyuan', '20250105074529', 'uploads/Device9/20250105074529/detected_B9.jpg', 'A9', '0', 7),
 ('51', '25.0328,121.1986', 'Taoyuan', '20250105104529', 'uploads/Device9/20250105104529/detected_B10.jpg', 'A9', '0', 8),
 ('52', '25.0328,121.1986', 'Taoyuan', '20250105134529', 'uploads/Device9/20250105134529/detected_B11.jpg', 'A9', '0', 9),
@@ -268,7 +268,7 @@ INSERT INTO `photo` (`photo_id`, `photo_address`, `photo_location`, `photo_time`
 ('57', '25.0017,121.2787', 'Taoyuan', '20250105104529', 'uploads/Device10/20250105104529/detected_B7.jpg', 'A10', '0', 6),
 ('58', '25.0017,121.2787', 'Taoyuan', '20250105134529', 'uploads/Device10/20250105134529/detected_B8.jpg', 'A10', '0', 6),
 ('59', '25.0017,121.2787', 'Taoyuan', '20250105164529', 'uploads/Device10/20250105164529/detected_B9.jpg', 'A10', '0', 7),
-('6', '24.947,121.1492', 'Taoyuan', '20250105014529', 'uploads/Device2/20250105014529/detected_B4.jpg', 'A2', '0', 3),
+('6', '24.947,121.1492', 'Taoyuan', '20250105014529', 'uploads/Device2/20250105014529/detected_B4.jpg', 'A2', '1', 3),
 ('60', '24.9492,121.2497', 'Taoyuan', '20250105014529', 'uploads/Device11/20250105014529/detected_B6.jpg', 'A11', '0', 5),
 ('61', '24.9492,121.2497', 'Taoyuan', '20250105044529', 'uploads/Device11/20250105044529/detected_B7.jpg', 'A11', '0', 6),
 ('62', '24.9492,121.2497', 'Taoyuan', '20250105074529', 'uploads/Device11/20250105074529/detected_B8.jpg', 'A11', '0', 6),
@@ -279,7 +279,7 @@ INSERT INTO `photo` (`photo_id`, `photo_address`, `photo_location`, `photo_time`
 ('67', '25.0624,121.1338', 'Taoyuan', '20250105044529', 'uploads/Device12/20250105044529/detected_B6.jpg', 'A12', '0', 5),
 ('68', '25.0624,121.1338', 'Taoyuan', '20250105074529', 'uploads/Device12/20250105074529/detected_B7.jpg', 'A12', '0', 6),
 ('69', '25.0624,121.1338', 'Taoyuan', '20250105104529', 'uploads/Device12/20250105104529/detected_B8.jpg', 'A12', '0', 6),
-('7', '24.947,121.1492', 'Taoyuan', '20250105044529', 'uploads/Device2/20250105044529/detected_B5.jpg', 'A2', '0', 4),
+('7', '24.947,121.1492', 'Taoyuan', '20250105044529', 'uploads/Device2/20250105044529/detected_B5.jpg', 'A2', '1', 4),
 ('70', '25.0624,121.1338', 'Taoyuan', '20250105134529', 'uploads/Device12/20250105134529/detected_B9.jpg', 'A12', '0', 7),
 ('71', '24.9956,121.261', 'Taoyuan', '20250105014529', 'uploads/Device13/20250105014529/detected_B5.jpg', 'A13', '0', 4),
 ('72', '24.9956,121.261', 'Taoyuan', '20250105044529', 'uploads/Device13/20250105044529/detected_B6.jpg', 'A13', '0', 5),
@@ -290,7 +290,7 @@ INSERT INTO `photo` (`photo_id`, `photo_address`, `photo_location`, `photo_time`
 ('77', '24.9898,121.1424', 'Taoyuan', '20250107052521', 'uploads/Device14/20250107052521/detected_B2.jpg', 'A14', '0', 1),
 ('78', '24.9898,121.1424', 'Taoyuan', '20250107082521', 'uploads/Device14/20250107082521/detected_B3.jpg', 'A14', '0', 2),
 ('79', '24.9898,121.1424', 'Taoyuan', '20250107112521', 'uploads/Device14/20250107112521/detected_B4.jpg', 'A14', '0', 3),
-('8', '24.947,121.1492', 'Taoyuan', '20250105074529', 'uploads/Device2/20250105074529/detected_B6.jpg', 'A2', '0', 5),
+('8', '24.947,121.1492', 'Taoyuan', '20250105074529', 'uploads/Device2/20250105074529/detected_B6.jpg', 'A2', '1', 5),
 ('80', '24.9898,121.1424', 'Taoyuan', '20250107142521', 'uploads/Device14/20250107142521/detected_B5.jpg', 'A14', '0', 4),
 ('81', '24.9898,121.1424', 'Taoyuan', '20250107172521', 'uploads/Device14/20250107172521/detected_B6.jpg', 'A14', '0', 5),
 ('82', '24.9898,121.1424', 'Taoyuan', '20250107202521', 'uploads/Device14/20250107202521/detected_B7.jpg', 'A14', '0', 6),
@@ -301,7 +301,7 @@ INSERT INTO `photo` (`photo_id`, `photo_address`, `photo_location`, `photo_time`
 ('87', '25.0274,121.157', 'Taoyuan', '20250107172521', 'uploads/Device15/20250107172521/detected_B8.jpg', 'A15', '0', 6),
 ('88', '25.0274,121.157', 'Taoyuan', '20250107202521', 'uploads/Device15/20250107202521/detected_B9.jpg', 'A15', '0', 7),
 ('89', '25.0765,121.2369', 'Taoyuan', '20241231035959', 'uploads/Device16/20241231035959/detected_B1.jpg', 'A16', '0', 0),
-('9', '24.947,121.1492', 'Taoyuan', '20250105104529', 'uploads/Device2/20250105104529/detected_B7.jpg', 'A2', '0', 6),
+('9', '24.947,121.1492', 'Taoyuan', '20250105104529', 'uploads/Device2/20250105104529/detected_B7.jpg', 'A2', '1', 6),
 ('90', '25.0765,121.2369', 'Taoyuan', '20241231065959', 'uploads/Device16/20241231065959/detected_B2.jpg', 'A16', '0', 1),
 ('91', '25.0765,121.2369', 'Taoyuan', '20241231095959', 'uploads/Device16/20241231095959/detected_B3.jpg', 'A16', '0', 2),
 ('92', '25.0765,121.2369', 'Taoyuan', '20241231125959', 'uploads/Device16/20241231125959/detected_B4.jpg', 'A16', '0', 3),
@@ -1325,8 +1325,8 @@ INSERT INTO `seg_photo` (`SP_id`, `photo_id`, `mosquito_id`, `SP_storage`, `x1`,
 --
 
 CREATE TABLE `user` (
+  `id` int(255) NOT NULL,
   `user_line` varchar(255) NOT NULL,
-  `user_name` varchar(255) NOT NULL,
   `device_id` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
@@ -1334,9 +1334,15 @@ CREATE TABLE `user` (
 -- 傾印資料表的資料 `user`
 --
 
-INSERT INTO `user` (`user_line`, `user_name`, `device_id`) VALUES
-('U201f6f1df6d28b73aab28c10cca83ed6', '001', 'A31'),
-('U2a0eeb00e78c10576380050767586586', 'Test_home', 'A30');
+INSERT INTO `user` (`id`, `user_line`, `device_id`) VALUES
+(5, 'U201f6f1df6d28b73aab28c10cca83ed6', 'A30'),
+(6, 'U201f6f1df6d28b73aab28c10cca83ed6', 'A29'),
+(9, 'U201f6f1df6d28b73aab28c10cca83ed6', 'A2'),
+(10, 'U2a0eeb00e78c10576380050767586586', 'A2'),
+(11, 'U201f6f1df6d28b73aab28c10cca83ed6', 'A4'),
+(12, 'U201f6f1df6d28b73aab28c10cca83ed6', 'A1'),
+(13, 'U201f6f1df6d28b73aab28c10cca83ed6', 'A5'),
+(14, 'U201f6f1df6d28b73aab28c10cca83ed6', 'A6');
 
 --
 -- 已傾印資料表的索引
@@ -1379,8 +1385,18 @@ ALTER TABLE `seg_photo`
 -- 資料表索引 `user`
 --
 ALTER TABLE `user`
-  ADD PRIMARY KEY (`user_line`),
+  ADD PRIMARY KEY (`id`),
   ADD KEY `device_id` (`device_id`);
+
+--
+-- 在傾印的資料表使用自動遞增(AUTO_INCREMENT)
+--
+
+--
+-- 使用資料表自動遞增(AUTO_INCREMENT) `user`
+--
+ALTER TABLE `user`
+  MODIFY `id` int(255) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- 已傾印資料表的限制式
