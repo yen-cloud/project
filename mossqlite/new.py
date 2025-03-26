@@ -25,7 +25,7 @@ app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads/'
 UPLOAD_FOLDER = 'uploads'
 PHOTO_FOLDER = 'uploads'
-BASE_URL = "https://525f-60-250-225-149.ngrok-free.app/"
+BASE_URL = "https://d348-60-250-225-148.ngrok-free.app/"
 line_bot_api = LineBotApi('jMX1SaNN3cvjjtEy5YNkKNrt/3A5L9Kef2iyaksxYLlTkOsMxaMYfQGBukFesISM22G/9mCLok8z7d3XpdV1bEzK84uDDD9+XKUbcu5B7SHA6Am48CgIcUnR8mSgIwm68Dl1p9Cr+++C+bSXw4h1TAdB04t89/1O/w1cDnyilFU=')
 handler = WebhookHandler('43f382150dc44c4f822d03fee9fdfc73')
 
@@ -510,10 +510,10 @@ def echo(event):
                 mosquito_info = seg_photo_dict.get(photo_id, [])
                 if mosquito_info:
                     mosquito_text = "\n".join(
-                        f"種類 {name}: {count} 隻" for name, count in mosquito_info
+                        f"{name}: {count} 隻" for name, count in mosquito_info
                     )
                 else:
-                    mosquito_text = "未檢測到任何蚊子"
+                    mosquito_text = "未檢測到新蚊子"
 
                 # 構建照片資訊
                 photo_info = (
