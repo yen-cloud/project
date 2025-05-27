@@ -28,7 +28,7 @@ app = Flask(__name__)
 LOG = create_logger(app)
 line_bot_api = LineBotApi('q3JVzzZMFT3uNo3WExjbE2i90qtTmP1TgdWpPOwPLSg/doEcypG+AR2gKqs+tQm1j1MD/UwNdj/FnaHySWILidNTupCnM10ibKrT4moG2nkjmKHXFwpwJGYWdPlnmwx0PXPXz+NA42UsVC+J/2GfaAdB04t89/1O/w1cDnyilFU=')
 handler = WebhookHandler('306e6fd7572e026ee719e1e4eb2ebca6')
-ngrok = 'https://f079-59-125-186-126.ngrok-free.app/'
+ngrok = 'https://29bd-60-250-225-147.ngrok-free.app/'
 
 # Initialize database
 db = Database(host='127.0.0.1', port=3306, user='root', passwd='', database='edema2')
@@ -465,7 +465,7 @@ questions = [
         "sub_question": {
             "text": "在你洗澡的過程中是否會覺得累或感到喘？",
             "options": ["非常累或喘", "很累或喘", "相當累或喘", "有點累或喘", "一點都不累或喘"],
-            "scores": [5, 4, 3, 2, 1]
+            "scores": [1, 2, 3, 4, 5]
         },
         "sub_question_condition": lambda answer: answer in ["泡澡", "沖澡"]
     },
@@ -475,7 +475,7 @@ questions = [
         "sub_question": {
             "text": "在走路的過程，是否有覺得累或感到喘？",
             "options": ["非常累或喘", "很累或喘", "相當累或喘", "有點累或喘", "一點都不累或喘"],
-            "scores": [5, 4, 3, 2, 1]
+            "scores": [1, 2, 3, 4, 5]
         },
         "sub_question_condition": lambda answer: answer == "有"
     },
@@ -485,14 +485,14 @@ questions = [
         "sub_question": {
             "text": "在走路的過程，是否有覺得累或感到喘？",
             "options": ["非常累或喘", "很累或喘", "相當累或喘", "有點累或喘", "一點都不累或喘"],
-            "scores": [5, 4, 3, 2, 1]
+            "scores": [1, 2, 3, 4, 5]
         },
         "sub_question_condition": lambda answer: answer == "有"
     },
     {
         "text": "今天早上起床，你是否有覺得腳部水腫？",
         "options": ["有", "沒有"],
-        "scores": [1, 0]
+        "scores": [0, 1]
     },
     {
         "text": "昨天有沒有因為疲憊(累)而去影響您去做您想做的事情呢？",
@@ -529,14 +529,14 @@ questions = [
         "sub_question": {
             "text": "是否需要坐著或墊高頭部才改善？",
             "options": ["需要", "不需要"],
-            "scores": [1, 0]
+            "scores": [0, 1]
         },
         "sub_question_condition": lambda answer: answer == "有"
     },
     {
         "text": "昨天有沒有因為心臟衰竭的症狀影響您享受生活呢？",
         "options": ["有", "沒有"],
-        "scores": [1, 0]
+        "scores": [0, 1]
     },
     {
         "text": "您昨天有因為心臟不舒服而影響您從事興趣，休閒活動，運動嗎？",
@@ -637,11 +637,11 @@ def echo(event):
         patient_id = user_states[user_id]['patient_id']
         try:
             db.insert("""
-                INSERT INTO patients (patient_id, line_id, name, height, gender, level)
-                VALUES (%s, %s, %s, NULL, NULL, NULL);
+                INSERT INTO patients (patient_id, line_id, name, height, gender, level, weight)
+                VALUES (%s, %s, %s, NULL, NULL, NULL, NULL);
             """, (patient_id, user_id, patient_name))
             db.insert("""
-                INSERT INTO patient_weights (patient_id, weight)
+                INSERT INTO patient (patient_id, weight)
                 VALUES (%s, NULL);
             """, (patient_id,))
             line_bot_api.reply_message(
@@ -685,9 +685,8 @@ def echo(event):
 
     if user_input == '查詢資料':
         result = db.select("""
-            SELECT p.name, p.height, p.gender, w.weight, p.level
+            SELECT name, height, gender, weight, level
             FROM patients p
-            JOIN patient_weights w ON p.patient_id = w.patient_id
             WHERE p.patient_id = %s;
         """, (patient_id,))
 
@@ -792,7 +791,7 @@ def echo(event):
     elif user_states.get(user_id) == 'editing_weight':
         try:
             new_weight = float(user_input)
-            db.update("UPDATE patient_weights SET weight = %s WHERE patient_id = %s;", (new_weight, patient_id))
+            db.update("UPDATE patients SET weight = %s WHERE patient_id = %s;", (new_weight, patient_id))
             user_states[user_id] = None
             line_bot_api.reply_message(
                 event.reply_token,
@@ -847,6 +846,8 @@ def echo(event):
                     index = sub_question["options"].index(user_input)
                     score = sub_question["scores"][index]
                     form_data_scores[user_id].append((f"q{current_question_idx + 1}_b", score))
+                else:
+                    form_data_scores[user_id].append((f"q{current_question_idx + 1}_b", None))
                 state["in_sub_question"] = False
                 state["current_question"] += 1
 
@@ -872,6 +873,8 @@ def echo(event):
                     index = current_question["options"].index(user_input)
                     score = current_question["scores"][index]
                     form_data_scores[user_id].append((f"q{current_question_idx + 1}_a", score))
+                else:
+                    form_data_scores[user_id].append((f"q{current_question_idx + 1}_a", None))
 
                 if "sub_question" in current_question and current_question["sub_question_condition"](user_input):
                     state["in_sub_question"] = True
@@ -882,6 +885,16 @@ def echo(event):
                     )
                     logger.info(f"User {user_id} entered sub-question for question {current_question_idx + 1}")
                 else:
+                    # If the user does not enter the sub-question, set the sub-question score based on conditions
+                    if "sub_question" in current_question:
+                        # Exceptions: Q1 (index 0) with "因行動不便無法洗澡", Q3 (index 2) with "因行動不便無法走路", and Q6 (index 5)
+                        if (current_question_idx == 0 and user_input == "因行動不便無法洗澡") or \
+                           (current_question_idx == 2 and user_input == "因行動不便無法走路") or \
+                           (current_question_idx == 5):
+                            form_data_scores[user_id].append((f"q{current_question_idx + 1}_b", None))
+                        else:
+                            # For all other cases, set the sub-question score to 5
+                            form_data_scores[user_id].append((f"q{current_question_idx + 1}_b", 5))
                     state["current_question"] += 1
                     if state["current_question"] < len(questions):
                         next_question = questions[state["current_question"]]
@@ -920,26 +933,26 @@ def show_results(event, user_id):
     # KCCQ-PL (Physical Limitation)
     pl_scores = [score_dict.get('q1_b'), score_dict.get('q2_b'), score_dict.get('q3_b')]
     pl_scores = [s for s in pl_scores if s is not None]
-    KCCQ_PL = 100 * (sum(pl_scores) / len(pl_scores) - 1) / 4 if pl_scores and len(pl_scores) >= 2 else None
+    KCCQ_PL = 100 * (sum(pl_scores) / 3 - 1) / 4 if pl_scores and len(pl_scores) >= 2 else None
 
     # KCCQ-SF (Symptom Frequency)
     sf_scores = [score_dict.get('q4_a'), rescale(score_dict.get('q5_b')), rescale(score_dict.get('q6_b')), rescale(score_dict.get('q8_b'))]
     sf_scores = [s for s in sf_scores if s is not None]
-    KCCQ_SF = sum(sf_scores) / len(sf_scores) if sf_scores and len(sf_scores) >= 2 else None
+    KCCQ_SF = sum(sf_scores) / 4 if sf_scores and len(sf_scores) >= 2 else None
 
     # KCCQ-QL (Quality of Life)
     ql_scores = [score_dict.get('q9_a'), score_dict.get('q14_a')]
     ql_scores = [s for s in ql_scores if s is not None]
-    KCCQ_QL = 100 * (sum(ql_scores) / len(ql_scores) - 1) / 4 if ql_scores and len(ql_scores) >= 1 else None
+    KCCQ_QL = 100 * (sum(ql_scores) / 2 - 1) / 4 if ql_scores and len(ql_scores) >= 1 else None
 
     # KCCQ-SL (Social Limitation)
     sl_scores = [score_dict.get('q10_b'), score_dict.get('q11_b'), score_dict.get('q12_b')]
     sl_scores = [s for s in sl_scores if s is not None]
-    KCCQ_SL = 100 * (sum(sl_scores) / len(sl_scores) - 1) / 4 if sl_scores and len(sl_scores) >= 2 else None
+    KCCQ_SL = 100 * (sum(sl_scores) / 3 - 1) / 4 if sl_scores and len(sl_scores) >= 2 else None
 
     # KCCQ-SUM (Overall Summary)
     sum_scores = [s for s in [KCCQ_PL, KCCQ_SF, KCCQ_QL, KCCQ_SL] if s is not None]
-    KCCQ_SUM = sum(sum_scores) / len(sum_scores) if sum_scores and len(sum_scores) >= 1 else None
+    KCCQ_SUM = sum(sum_scores) / 4 if sum_scores and len(sum_scores) >= 1 else None
 
     # Categorize the result
     def categorize_score(score):
