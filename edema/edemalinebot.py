@@ -28,7 +28,7 @@ app = Flask(__name__)
 LOG = create_logger(app)
 line_bot_api = LineBotApi('q3JVzzZMFT3uNo3WExjbE2i90qtTmP1TgdWpPOwPLSg/doEcypG+AR2gKqs+tQm1j1MD/UwNdj/FnaHySWILidNTupCnM10ibKrT4moG2nkjmKHXFwpwJGYWdPlnmwx0PXPXz+NA42UsVC+J/2GfaAdB04t89/1O/w1cDnyilFU=')
 handler = WebhookHandler('306e6fd7572e026ee719e1e4eb2ebca6')
-ngrok = 'https://29bd-60-250-225-147.ngrok-free.app/'
+ngrok = 'https://d7ff-61-216-173-101.ngrok-free.app/'
 
 # Initialize database
 db = Database(host='127.0.0.1', port=3306, user='root', passwd='', database='edema2')
@@ -459,7 +459,7 @@ def create_flex_message(question, options):
     return FlexSendMessage(alt_text='問卷問題', contents=bubble)
 
 questions = [
-    {
+    {   #1
         "text": "請問你今天是泡澡還是沖澡？",
         "options": ["泡澡", "沖澡", "擦澡", "不想洗澡", "因行動不便無法洗澡"],
         "sub_question": {
@@ -467,9 +467,9 @@ questions = [
             "options": ["非常累或喘", "很累或喘", "相當累或喘", "有點累或喘", "一點都不累或喘"],
             "scores": [1, 2, 3, 4, 5]
         },
-        "sub_question_condition": lambda answer: answer in ["泡澡", "沖澡"]
+        "sub_question_condition": lambda answer: answer in ["泡澡", "沖澡", "擦澡"]
     },
-    {
+    {   #2
         "text": "有沒有去便利商店散步？",
         "options": ["有", "沒有"],
         "sub_question": {
@@ -479,7 +479,7 @@ questions = [
         },
         "sub_question_condition": lambda answer: answer == "有"
     },
-    {
+    {   #3
         "text": "有沒有急著去做一件事？",
         "options": ["有", "沒有", "因行動不便無法走路"],
         "sub_question": {
@@ -489,32 +489,32 @@ questions = [
         },
         "sub_question_condition": lambda answer: answer == "有"
     },
-    {
+    {   #4
         "text": "今天早上起床，你是否有覺得腳部水腫？",
         "options": ["有", "沒有"],
-        "scores": [0, 1]
+        "scores": [0, 5]
     },
-    {
+    {   #5
         "text": "昨天有沒有因為疲憊(累)而去影響您去做您想做的事情呢？",
         "options": ["有", "沒有"],
         "sub_question": {
             "text": "昨天大概有幾次因為疲憊(累)而去影響您去做您想做的事情呢？",
             "options": ["整天都累", "好多次", "1~3次"],
-            "scores": [1, 1, 1]
+            "scores": [1, 1, 3]
         },
         "sub_question_condition": lambda answer: answer == "有"
     },
-    {
+    {   #6
         "text": "昨天有沒有因為呼吸急促(喘)而去影響您去做您想做的事情呢？",
         "options": ["有", "沒有"],
         "sub_question": {
             "text": "昨天大概有幾次因為呼吸急促(喘)而去影響您去做您想做的事情呢？",
             "options": ["整天都累", "好多次", "1~3次"],
-            "scores": [1, 1, 1]
+            "scores": [1, 1, 3]
         },
         "sub_question_condition": lambda answer: answer == "有"
     },
-    {
+    {   #7
         "text": "請問您昨天睡得好不好呢？",
         "options": ["好", "不好"],
         "sub_question": {
@@ -523,22 +523,22 @@ questions = [
         },
         "sub_question_condition": lambda answer: answer == "不好"
     },
-    {
+    {   #8
         "text": "是否有因為呼吸急促而造成您睡不好？",
         "options": ["有", "沒有"],
         "sub_question": {
             "text": "是否需要坐著或墊高頭部才改善？",
             "options": ["需要", "不需要"],
-            "scores": [0, 1]
+            "scores": [1, 3]
         },
         "sub_question_condition": lambda answer: answer == "有"
     },
-    {
+    {   #9
         "text": "昨天有沒有因為心臟衰竭的症狀影響您享受生活呢？",
         "options": ["有", "沒有"],
-        "scores": [0, 1]
+        "scores": [0, 5]
     },
-    {
+    {   #10
         "text": "您昨天有因為心臟不舒服而影響您從事興趣，休閒活動，運動嗎？",
         "options": ["有", "沒有"],
         "sub_question": {
@@ -548,7 +548,7 @@ questions = [
         },
         "sub_question_condition": lambda answer: answer == "有"
     },
-    {
+    {   #11
         "text": "您昨天有因為心臟不舒服而影響您從事工作，家務嗎？",
         "options": ["有", "沒有"],
         "sub_question": {
@@ -558,7 +558,7 @@ questions = [
         },
         "sub_question_condition": lambda answer: answer == "有"
     },
-    {
+    {   #12
         "text": "您昨天有因為心臟不舒服而影響您從事外出，拜訪朋友嗎？",
         "options": ["有", "沒有"],
         "sub_question": {
@@ -568,7 +568,7 @@ questions = [
         },
         "sub_question_condition": lambda answer: answer == "有"
     },
-    {
+    {   #13
         "text": "您昨天有因為心臟不舒服而影響您從事開車，騎車嗎？",
         "options": ["有", "沒有", "無法執行"],
         "sub_question": {
@@ -577,7 +577,7 @@ questions = [
         },
         "sub_question_condition": lambda answer: answer == "有"
     },
-    {
+    {   #14
         "text": "請問您對目前心臟衰竭治療的改善情況，能不能接受呢？",
         "options": ["一點也不能接受", "大部分不能接受", "尚可接受", "大部分能接受", "完全沒有影響生活"],
         "scores": [1, 2, 3, 4, 5]
@@ -890,7 +890,7 @@ def echo(event):
                         # Exceptions: Q1 (index 0) with "因行動不便無法洗澡", Q3 (index 2) with "因行動不便無法走路", and Q6 (index 5)
                         if (current_question_idx == 0 and user_input == "因行動不便無法洗澡") or \
                            (current_question_idx == 2 and user_input == "因行動不便無法走路") or \
-                           (current_question_idx == 5):
+                           (current_question_idx == 12 and user_input == "無法執行"):
                             form_data_scores[user_id].append((f"q{current_question_idx + 1}_b", None))
                         else:
                             # For all other cases, set the sub-question score to 5
@@ -935,8 +935,24 @@ def show_results(event, user_id):
     pl_scores = [s for s in pl_scores if s is not None]
     KCCQ_PL = 100 * (sum(pl_scores) / 3 - 1) / 4 if pl_scores and len(pl_scores) >= 2 else None
 
+    # Define rescale functions for different divisors
+    def rescale_div4(score):
+        if score is None:
+            return None
+        return 100 * (score - 1) / 4
+
+    def rescale_div5(score):
+        if score is None:
+            return None
+        return 100 * (score - 1) / 5
+
     # KCCQ-SF (Symptom Frequency)
-    sf_scores = [score_dict.get('q4_a'), rescale(score_dict.get('q5_b')), rescale(score_dict.get('q6_b')), rescale(score_dict.get('q8_b'))]
+    sf_scores = [
+        rescale_div4(score_dict.get('q4_a')),    # Q4: divisor 4
+        rescale_div5(score_dict.get('q5_b')),    # Q5: divisor 5
+        rescale_div5(score_dict.get('q6_b')),    # Q6: divisor 5
+        rescale_div4(score_dict.get('q8_b'))     # Q8: divisor 4
+    ]
     sf_scores = [s for s in sf_scores if s is not None]
     KCCQ_SF = sum(sf_scores) / 4 if sf_scores and len(sf_scores) >= 2 else None
 
