@@ -28,7 +28,7 @@ app = Flask(__name__)
 LOG = create_logger(app)
 line_bot_api = LineBotApi('q3JVzzZMFT3uNo3WExjbE2i90qtTmP1TgdWpPOwPLSg/doEcypG+AR2gKqs+tQm1j1MD/UwNdj/FnaHySWILidNTupCnM10ibKrT4moG2nkjmKHXFwpwJGYWdPlnmwx0PXPXz+NA42UsVC+J/2GfaAdB04t89/1O/w1cDnyilFU=')
 handler = WebhookHandler('306e6fd7572e026ee719e1e4eb2ebca6')
-ngrok = 'https://d7ff-61-216-173-101.ngrok-free.app/'
+ngrok = 'https://d847-211-72-73-210.ngrok-free.app/'
 
 # Initialize database
 db = Database(host='127.0.0.1', port=3306, user='root', passwd='', database='edema2')
@@ -704,6 +704,39 @@ def echo(event):
                 TextSendMessage(text='未查詢到相關資料')
             )
             logger.error(f"No data found for patient ID {patient_id}")
+
+    elif user_input == '開始':
+        try:
+            db.update("UPDATE patients SET start = 1 WHERE patient_id = %s;", (patient_id,))
+            line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(text=f'病患 ID {patient_id} 的開始狀態已設定為 1。')
+            )
+            logger.info(f"Set start to 1 for patient ID {patient_id}")
+        except Exception as e:
+            line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(text='更新開始狀態失敗，請稍後重試。')
+            )
+            logger.error(f"Error setting start for patient ID {patient_id}: {e}")
+        return
+
+    elif user_input == '校正':
+        try:
+            db.update("UPDATE patients SET correction = -1 WHERE patient_id = %s;", (patient_id,))
+            line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(text=f'病患 ID {patient_id} 的校正狀態已設定為 -1。')
+            )
+            logger.info(f"Set correction to -1 for patient ID {patient_id}")
+        except Exception as e:
+            line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(text='更新校正狀態失敗，請稍後重試。')
+            )
+            logger.error(f"Error setting correction for patient ID {patient_id}: {e}")
+        return
+
 
     elif user_input == '測量歷史':
         patient_id = get_patient_id(user_id)
