@@ -28,7 +28,7 @@ app = Flask(__name__)
 LOG = create_logger(app)
 line_bot_api = LineBotApi('q3JVzzZMFT3uNo3WExjbE2i90qtTmP1TgdWpPOwPLSg/doEcypG+AR2gKqs+tQm1j1MD/UwNdj/FnaHySWILidNTupCnM10ibKrT4moG2nkjmKHXFwpwJGYWdPlnmwx0PXPXz+NA42UsVC+J/2GfaAdB04t89/1O/w1cDnyilFU=')
 handler = WebhookHandler('306e6fd7572e026ee719e1e4eb2ebca6')
-ngrok = ' https://ed35-59-125-186-124.ngrok-free.app/'
+ngrok = 'https://d847-211-72-73-210.ngrok-free.app/'
 
 # Initialize database
 db = Database(host='127.0.0.1', port=3306, user='root', passwd='', database='edema')
@@ -596,9 +596,7 @@ def handle_action(event, user_id, patient_id, action):
 
     elif action == '開始':
         try:
-            # 更新 patients 表的 start 欄位
             db.update("UPDATE patients SET start = 1 WHERE patient_id = %s", (patient_id,))
-            # 插入 patient_id 到 device_table 的 test_id
             db.insert("INSERT INTO device_table (test_id) VALUES (%s)", (patient_id,))
             line_bot_api.reply_message(
                 event.reply_token,
@@ -673,44 +671,31 @@ def handle_action(event, user_id, patient_id, action):
         user_states[user_id] = {'current_question': 0, 'in_sub_question': False, 'patient_id': patient_id}
         form_data[user_id] = []
         form_data_scores[user_id] = []
-        try:
-            first_question = questions[0]
-            line_bot_api.reply_message(
-                event.reply_token,
-                create_flex_message(first_question["text"], first_question["options"])
-            )
-            logger.info(f"User {user_id} started questionnaire for patient ID {patient_id}, sent first question: {first_question['text']}")
-        except Exception as e:
-            line_bot_api.reply_message(
-                event.reply_token,
-                TextSendMessage(text="無法啟動問卷，請稍後重試。")
-            )
-            logger.error(f"Error starting questionnaire for user {user_id}: {e}")
-            user_states.pop(user_id, None)
-            form_data.pop(user_id, None)
-            form_data_scores.pop(user_id, None)
+        first_question = questions[0]
+        line_bot_api.reply_message(
+            event.reply_token,
+            create_flex_message(first_question["text"], first_question["options"])
+        )
+        logger.info(f"User {user_id} started questionnaire for patient ID {patient_id}")
+
 @handler.add(MessageEvent)
 def echo(event):
     user_id = event.source.user_id
     user_input = event.message.text.strip()
-    logger.info(f"Received message from user {user_id}: {user_input}")
+    logger.info(f"Received message from user {user_id}: {user_input}, current state: {user_states.get(user_id)}")
 
     # 檢查是否正在選擇姓名
     if user_states.get(user_id) == 'selecting_name':
         patient_name = user_input
-        # 查詢是否有該姓名
         patient_data = db.select("SELECT patient_id, name FROM patients WHERE name = %s AND line_id = %s", 
                                 (patient_name, user_id))
         if patient_data:
-            # 找到對應病患，儲存 patient_id 和操作類型
             patient_id = patient_data[0][0]
             pending_action = user_states[user_id + '_pending_action']
             user_states[user_id] = None
             user_states[user_id + '_pending_action'] = None
-            # 執行對應操作
             handle_action(event, user_id, patient_id, pending_action)
         else:
-            # 未找到姓名，詢問是否新增
             user_states[user_id] = 'confirm_add_name'
             user_states[user_id + '_pending_name'] = patient_name
             user_states[user_id + '_pending_action'] = user_states.get(user_id + '_pending_action')
@@ -726,12 +711,10 @@ def echo(event):
             patient_name = user_states[user_id + '_pending_name']
             pending_action = user_states[user_id + '_pending_action']
             try:
-                # 新增病患（patient_id 由資料庫自增）
                 db.insert("""
                     INSERT INTO patients (line_id, name, height, gender, level, weight, start, correction)
                     VALUES (%s, %s, NULL, NULL, NULL, NULL, 0, 0)
                 """, (user_id, patient_name))
-                # 查詢剛新增的 patient_id
                 patient_data = db.select("SELECT patient_id FROM patients WHERE name = %s AND line_id = %s", 
                                         (patient_name, user_id))
                 if patient_data:
@@ -743,8 +726,7 @@ def echo(event):
                         event.reply_token,
                         TextSendMessage(text=f'已新增病患姓名「{patient_name}」，病患 ID 為 {patient_id}。')
                     )
-                    # 執行對應操作
-                    handle_action(event, user_id, patient_id, pending_action)
+                    logger.info(f"User {user_id} added new patient: ID {patient_id}, Name {patient_name}")
                 else:
                     line_bot_api.reply_message(
                         event.reply_token,
@@ -771,6 +753,45 @@ def echo(event):
                 event.reply_token,
                 TextSendMessage(text='請回覆「是」或「否」。')
             )
+        return
+
+    # 檢查是否正在新增姓名
+    elif user_states.get(user_id) == 'adding_name':
+        patient_name = user_input
+        try:
+            db.insert("""
+                INSERT INTO patients (line_id, name, height, gender, level, weight, start, correction)
+                VALUES (%s, %s, NULL, NULL, NULL, NULL, 0, 0)
+            """, (user_id, patient_name))
+            patient_data = db.select("SELECT patient_id FROM patients WHERE name = %s AND line_id = %s", 
+                                    (patient_name, user_id))
+            if patient_data:
+                patient_id = patient_data[0][0]
+                user_states[user_id] = {'current_question': 0, 'in_sub_question': False, 'patient_id': patient_id}
+                form_data[user_id] = []
+                form_data_scores[user_id] = []
+                first_question = questions[0]
+                line_bot_api.reply_message(
+                    event.reply_token,
+                    TextSendMessage(text=f'已新增病患姓名「{patient_name}」，病患 ID 為 {patient_id}。')
+                )
+                line_bot_api.reply_message(
+                    event.reply_token,
+                    create_flex_message(first_question["text"], first_question["options"])
+                )
+                logger.info(f"User {user_id} added new patient: ID {patient_id}, Name {patient_name}, started questionnaire")
+            else:
+                line_bot_api.reply_message(
+                    event.reply_token,
+                    TextSendMessage(text='新增病患失敗，請稍後重試。')
+                )
+                logger.error(f"Failed to retrieve new patient_id for name {patient_name}, user {user_id}")
+        except Exception as e:
+            line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(text='新增病患失敗，請稍後重試。')
+            )
+            logger.error(f"Error adding patient for user {user_id}: {e}")
         return
 
     # 檢查是否正在編輯資料
@@ -908,8 +929,8 @@ def echo(event):
                     else:
                         if "sub_question" in current_question:
                             if (current_question_idx == 0 and user_input == "因行動不便無法洗澡") or \
-                            (current_question_idx == 2 and user_input == "因行動不便無法走路") or \
-                            (current_question_idx == 12 and user_input == "無法執行"):
+                               (current_question_idx == 2 and user_input == "因行動不便無法走路") or \
+                               (current_question_idx == 12 and user_input == "無法執行"):
                                 form_data_scores[user_id].append((f"q{current_question_idx + 1}_b", None))
                             else:
                                 form_data_scores[user_id].append((f"q{current_question_idx + 1}_b", 5))
@@ -961,39 +982,6 @@ def echo(event):
         logger.info(f"User {user_id} started adding new patient")
         return
 
-    elif user_states.get(user_id) == 'adding_name':
-        patient_name = user_input
-        try:
-            # 新增病患（patient_id 由資料庫自增）
-            db.insert("""
-                INSERT INTO patients (line_id, name, height, gender, level, weight, start, correction)
-                VALUES (%s, %s, NULL, NULL, NULL, NULL, 0, 0)
-            """, (user_id, patient_name))
-            # 查詢剛新增的 patient_id
-            patient_data = db.select("SELECT patient_id FROM patients WHERE name = %s AND line_id = %s", 
-                                    (patient_name, user_id))
-            if patient_data:
-                patient_id = patient_data[0][0]
-                user_states[user_id] = None
-                line_bot_api.reply_message(
-                    event.reply_token,
-                    TextSendMessage(text=f'已新增病患姓名「{patient_name}」，病患 ID 為 {patient_id}。')
-                )
-                logger.info(f"User {user_id} added new patient: ID {patient_id}, Name {patient_name}")
-            else:
-                line_bot_api.reply_message(
-                    event.reply_token,
-                    TextSendMessage(text='新增病患失敗，請稍後重試。')
-                )
-                logger.error(f"Failed to retrieve new patient_id for name {patient_name}, user {user_id}")
-        except Exception as e:
-            line_bot_api.reply_message(
-                event.reply_token,
-                TextSendMessage(text='新增病患失敗，請稍後重試。')
-            )
-            logger.error(f"Error adding patient for user {user_id}: {e}")
-        return
-
     # 如果輸入不是關鍵詞，也不是處理中的狀態，回應默認訊息
     line_bot_api.reply_message(
         event.reply_token,
@@ -1037,10 +1025,10 @@ def show_results(event, user_id, patient_id):
 
     # KCCQ-SF (Symptom Frequency)
     sf_scores = [
-        rescale_div4(score_dict.get('q4_a')),    # Q4: divisor 4
-        rescale_div5(score_dict.get('q5_b')),    # Q5: divisor 5
-        rescale_div5(score_dict.get('q6_b')),    # Q6: divisor 5
-        rescale_div4(score_dict.get('q8_b'))     # Q8: divisor 4
+        rescale_div4(score_dict.get('q4_a')),
+        rescale_div5(score_dict.get('q5_b')),
+        rescale_div5(score_dict.get('q6_b')),
+        rescale_div4(score_dict.get('q8_b'))
     ]
     sf_scores = [s for s in sf_scores if s is not None]
     KCCQ_SF = sum(sf_scores) / len(sf_scores) if sf_scores and len(sf_scores) >= 2 else None
@@ -1121,5 +1109,4 @@ if __name__ == "__main__":
     try:
         app.run(debug=False)
     finally:
-        db.close_connection()
-#現在表單填寫會有一個問題是他沒辦法接續下一個動作，但是如果第一個有打出來後面又可以正常填寫表單。
+        db.close_connection()  
