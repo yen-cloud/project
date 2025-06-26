@@ -28,7 +28,7 @@ app = Flask(__name__)
 LOG = create_logger(app)
 line_bot_api = LineBotApi('q3JVzzZMFT3uNo3WExjbE2i90qtTmP1TgdWpPOwPLSg/doEcypG+AR2gKqs+tQm1j1MD/UwNdj/FnaHySWILidNTupCnM10ibKrT4moG2nkjmKHXFwpwJGYWdPlnmwx0PXPXz+NA42UsVC+J/2GfaAdB04t89/1O/w1cDnyilFU=')
 handler = WebhookHandler('306e6fd7572e026ee719e1e4eb2ebca6')
-ngrok = 'https://d847-211-72-73-210.ngrok-free.app/'
+ngrok = 'https://d0c0-211-72-73-205.ngrok-free.app/'
 
 # Initialize database
 db = Database(host='127.0.0.1', port=3306, user='root', passwd='', database='edema')
@@ -1000,52 +1000,61 @@ def show_results(event, user_id, patient_id):
 
     # Extract scores
     score_dict = dict(form_data_scores[user_id])
+    logger.info(f"Score dictionary for user {user_id}: {score_dict}")
 
-    # Calculate KCCQ scores
-    def rescale(score):
+    # Calculate KCCQ scores with validation
+    def rescale(score, divisor):
         if score is None:
             return None
-        return 100 * (score - 1) / 4
+        # Ensure minimum value is 0
+        raw_score = max(0, 100 * (score - 1) / divisor)
+        return min(100, raw_score)  # Cap at 100
 
     # KCCQ-PL (Physical Limitation)
     pl_scores = [score_dict.get('q1_b'), score_dict.get('q2_b'), score_dict.get('q3_b')]
-    pl_scores = [s for s in pl_scores if s is not None]
-    KCCQ_PL = 100 * (sum(pl_scores) / len(pl_scores) - 1) / 4 if pl_scores and len(pl_scores) >= 2 else None
-
-    # Define rescale functions for different divisors
-    def rescale_div4(score):
-        if score is None:
-            return None
-        return 100 * (score - 1) / 4
-
-    def rescale_div5(score):
-        if score is None:
-            return None
-        return 100 * (score - 1) / 5
+    pl_scores = [s for s in pl_scores if s is not None and 0 <= s <= 5]  # Validate score range
+    if pl_scores and len(pl_scores) >= 2:
+        avg_pl = sum(pl_scores) / len(pl_scores)
+        KCCQ_PL = rescale(avg_pl, 4)
+    else:
+        KCCQ_PL = None
+    logger.info(f"KCCQ_PL scores: {pl_scores}, result: {KCCQ_PL}")
 
     # KCCQ-SF (Symptom Frequency)
     sf_scores = [
-        rescale_div4(score_dict.get('q4_a')),
-        rescale_div5(score_dict.get('q5_b')),
-        rescale_div5(score_dict.get('q6_b')),
-        rescale_div4(score_dict.get('q8_b'))
+        rescale(score_dict.get('q4_a'), 4),
+        rescale(score_dict.get('q5_b'), 5),
+        rescale(score_dict.get('q6_b'), 5),
+        rescale(score_dict.get('q8_b'), 4)
     ]
     sf_scores = [s for s in sf_scores if s is not None]
     KCCQ_SF = sum(sf_scores) / len(sf_scores) if sf_scores and len(sf_scores) >= 2 else None
+    logger.info(f"KCCQ_SF scores: {sf_scores}, result: {KCCQ_SF}")
 
     # KCCQ-QL (Quality of Life)
     ql_scores = [score_dict.get('q9_a'), score_dict.get('q14_a')]
-    ql_scores = [s for s in ql_scores if s is not None]
-    KCCQ_QL = 100 * (sum(ql_scores) / len(ql_scores) - 1) / 4 if ql_scores and len(ql_scores) >= 1 else None
+    ql_scores = [s for s in ql_scores if s is not None and 0 <= s <= 5]
+    if ql_scores and len(ql_scores) >= 1:
+        avg_ql = sum(ql_scores) / len(ql_scores)
+        KCCQ_QL = rescale(avg_ql, 4)
+    else:
+        KCCQ_QL = None
+    logger.info(f"KCCQ_QL scores: {ql_scores}, result: {KCCQ_QL}")
 
     # KCCQ-SL (Social Limitation)
     sl_scores = [score_dict.get('q10_b'), score_dict.get('q11_b'), score_dict.get('q12_b')]
-    sl_scores = [s for s in sl_scores if s is not None]
-    KCCQ_SL = 100 * (sum(sl_scores) / len(sl_scores) - 1) / 4 if sl_scores and len(sl_scores) >= 2 else None
+    sl_scores = [s for s in sl_scores if s is not None and 0 <= s <= 5]
+    if sl_scores and len(sl_scores) >= 2:
+        avg_sl = sum(sl_scores) / len(sl_scores)
+        KCCQ_SL = rescale(avg_sl, 4)
+    else:
+        KCCQ_SL = None
+    logger.info(f"KCCQ_SL scores: {sl_scores}, result: {KCCQ_SL}")
 
     # KCCQ-SUM (Overall Summary)
     sum_scores = [s for s in [KCCQ_PL, KCCQ_SF, KCCQ_QL, KCCQ_SL] if s is not None]
     KCCQ_SUM = sum(sum_scores) / len(sum_scores) if sum_scores and len(sum_scores) >= 1 else None
+    logger.info(f"KCCQ_SUM scores: {sum_scores}, result: {KCCQ_SUM}")
 
     # Categorize the result
     def categorize_score(score):
@@ -1109,4 +1118,4 @@ if __name__ == "__main__":
     try:
         app.run(debug=False)
     finally:
-        db.close_connection()  
+        db.close_connection()
