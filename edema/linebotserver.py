@@ -28,7 +28,7 @@ app = Flask(__name__)
 LOG = create_logger(app)
 line_bot_api = LineBotApi('q3JVzzZMFT3uNo3WExjbE2i90qtTmP1TgdWpPOwPLSg/doEcypG+AR2gKqs+tQm1j1MD/UwNdj/FnaHySWILidNTupCnM10ibKrT4moG2nkjmKHXFwpwJGYWdPlnmwx0PXPXz+NA42UsVC+J/2GfaAdB04t89/1O/w1cDnyilFU=')
 handler = WebhookHandler('306e6fd7572e026ee719e1e4eb2ebca6')
-ngrok = 'https://d0c0-211-72-73-205.ngrok-free.app/'
+ngrok = 'https://d47a-175-183-33-223.ngrok-free.app/'
 
 # Initialize database
 db = Database(host='127.0.0.1', port=3306, user='root', passwd='', database='edema')
