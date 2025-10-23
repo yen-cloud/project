@@ -1,0 +1,68 @@
+登入EC2 ssh -i C:\Users\eugen\OneDrive\桌面\edema.pem ec2-user@35.75.6.231
+	
+Amazon Linux 提供的 MySQL 工具包
+sudo dnf install -y mariadb105
+創虛擬環境:cd ~/app
+
+# 建立虛擬環境
+python3 -m venv .venv
+source .venv/bin/activate
+
+# 安裝必要套件（依你的程式需求）
+pip install --upgrade pip
+pip install flask flask-cors mysql-connector-python
+
+複製檔案從本機到ec2: scp -i "C:\Users\eugen\OneDrive\桌面\edema.pem" "C:\Users\eugen\OneDrive\文件\edema\app.py" ec2-user@35.75.6.231:~/app
+進入EC2時引入資料庫的方式
+export DB_HOST=edema.ctyco2mkcsfp.ap-northeast-1.rds.amazonaws.com
+export DB_PORT=3306
+export DB_USER=admin
+export DB_PASS=brain0918
+export DB_NAME=edema
+進環境:source .venv_edema/bin/activate
+先cd ~/app
+透過安裝與設定 Nginx（80 → 5000）將5000port打開可以直接連進去
+sudo dnf install -y nginx
+sudo systemctl enable --now nginx
+
+sudo tee /etc/nginx/conf.d/webapp.conf >/dev/null << 'EOF'
+server {
+    listen 80;
+    server_name _;
+
+    # 如有照片等靜態檔案，直接由 Nginx 服務更有效率
+    location /photo/ {
+        alias /home/ec2-user/app/photo/;
+        autoindex off;
+    }
+
+    # 其餘全轉給 Flask (Gunicorn)
+    location / {
+        proxy_pass http://127.0.0.1:5000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+EOF
+
+sudo nginx -t
+sudo systemctl restart nginx
+
+停止自動開啟:
+sudo systemctl stop linebotserver.service
+
+登入mysql:mysql -h edema.ctyco2mkcsfp.ap-northeast-1.rds.amazonaws.com -u admin -p
+
+
+停止服務
+
+net stop MySQL84
+如果不想讓它每次開機都自動啟動
+
+sc config MySQL84 start= disabled
+如果還要用 MySQL
+net start MySQL84
+
+
